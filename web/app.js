@@ -6,7 +6,7 @@
  * the Node test suite can exercise it without a DOM.
  */
 
-import { callAnthropic, emptyResult } from "./triage-core.js";
+import { callAnthropic, emptyResult } from "./triage-core.js?v=2";
 
 const STORAGE_KEY = "strata-triage:anthropic-api-key";
 
