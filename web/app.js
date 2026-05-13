@@ -49,7 +49,15 @@ const els = {
   status: $("status"),
   output: $("output"),
   config: $("config"),
+  setupHint: $("setupHint"),
 };
+
+const EMPTY_OUTPUT_HTML = `
+  <div class="empty">
+    <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty__icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+    <p class="empty__title">No result yet</p>
+    <p class="empty__copy">Paste an enquiry and click <strong>Run triage</strong>.</p>
+  </div>`;
 
 let lastResult = null;
 let sampleIdx = 0;
@@ -61,18 +69,24 @@ function loadKey() {
   if (k) {
     els.apiKey.value = k;
     els.config.open = false;
+    els.setupHint.textContent = "Key saved · click to edit";
   } else {
     els.config.open = true;
+    els.setupHint.textContent = "Click to set your Anthropic key";
   }
 }
 function saveKey() {
   const k = els.apiKey.value.trim();
-  if (k) localStorage.setItem(STORAGE_KEY, k);
+  if (k) {
+    localStorage.setItem(STORAGE_KEY, k);
+    els.setupHint.textContent = "Key saved · click to edit";
+  }
 }
 function clearKey() {
   localStorage.removeItem(STORAGE_KEY);
   els.apiKey.value = "";
-  setStatus("API key cleared.", "ok");
+  els.setupHint.textContent = "Click to set your Anthropic key";
+  setStatus("API key cleared", "ok");
 }
 
 els.apiKey.addEventListener("change", saveKey);
@@ -96,12 +110,13 @@ function setStatus(text, kind = "") {
 els.loadSampleBtn.addEventListener("click", () => {
   els.enquiry.value = SAMPLES[sampleIdx % SAMPLES.length];
   sampleIdx += 1;
-  setStatus(`sample ${sampleIdx} loaded`, "ok");
+  setStatus(`Sample ${sampleIdx} loaded`, "ok");
+  els.enquiry.focus();
 });
 
 els.clearBtn.addEventListener("click", () => {
   els.enquiry.value = "";
-  els.output.innerHTML = '<p class="placeholder">No result yet. Paste an enquiry and click <strong>RUN TRIAGE</strong>.</p>';
+  els.output.innerHTML = EMPTY_OUTPUT_HTML;
   els.copyJsonBtn.disabled = true;
   lastResult = null;
   setStatus("");
@@ -115,27 +130,38 @@ els.runBtn.addEventListener("click", async () => {
 
   if (!enquiry) {
     renderResult(emptyResult());
-    setStatus("empty input — short-circuited", "ok");
+    setStatus("Empty input — short-circuited", "ok");
     return;
   }
   if (!apiKey) {
-    setStatus("paste your anthropic key (config panel above) first", "error");
+    setStatus("Paste your Anthropic API key first", "error");
     els.config.open = true;
+    els.apiKey.focus();
     return;
   }
 
   els.runBtn.disabled = true;
-  setStatus("calling claude...", "ok");
+  els.runBtn.classList.add("is-loading");
+  setStatus("Calling Claude…");
   try {
     saveKey();
     const result = await callAnthropic(apiKey, enquiry);
     renderResult(result);
-    setStatus("done", "ok");
+    setStatus("Done", "ok");
   } catch (err) {
     console.error(err);
-    setStatus(err.message || "error", "error");
+    setStatus(err.message || "Error", "error");
   } finally {
     els.runBtn.disabled = false;
+    els.runBtn.classList.remove("is-loading");
+  }
+});
+
+// Submit on Cmd/Ctrl + Enter from inside the textarea.
+els.enquiry.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+    e.preventDefault();
+    els.runBtn.click();
   }
 });
 
@@ -163,42 +189,56 @@ function renderResult(r) {
   const urgency = safe(r.urgency, "normal").toLowerCase();
   const flagsArr = Array.isArray(r.flags) ? r.flags : [];
   const flagsHtml = flagsArr.length
-    ? flagsArr.map((f) => `<span class="badge badge--flag">${escapeHtml(f)}</span>`).join("")
-    : "<em>—</em>";
+    ? flagsArr
+        .map((f) => `<span class="badge badge--flag">${escapeHtml(f)}</span>`)
+        .join("")
+    : `<span class="row__value" style="color: var(--muted);">None</span>`;
 
   els.output.innerHTML = `
-    <div class="result__row">
-      <span class="result__label">Category</span>
-      <span class="result__value">
-        <span class="badge badge--category">${escapeHtml(safe(r.category))}</span>
-      </span>
+    <div class="result">
+      <div class="result__top">
+        <div class="metric">
+          <span class="metric__label">Category</span>
+          <div class="metric__value">
+            <span class="badge badge--category">${escapeHtml(safe(r.category))}</span>
+          </div>
+        </div>
+        <div class="metric">
+          <span class="metric__label">Urgency</span>
+          <div class="metric__value">
+            <span class="badge badge--urgency-${escapeHtml(urgency)}">${escapeHtml(urgency)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric">
+        <span class="metric__label">Confidence</span>
+        <div class="confidence">
+          <div class="confidence__bar"><div class="confidence__fill" style="width:${confPct}%"></div></div>
+          <span class="confidence__pct">${confPct}%</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <span class="row__label">Sender intent</span>
+        <div class="row__value">${escapeHtml(safe(r.sender_intent, "—"))}</div>
+      </div>
+
+      <div class="row">
+        <span class="row__label">Recommended action</span>
+        <div class="row__value">${escapeHtml(safe(r.recommended_action, "—"))}</div>
+      </div>
+
+      <div class="row">
+        <span class="row__label">Flags</span>
+        <div class="row__value flags-row">${flagsHtml}</div>
+      </div>
+
+      <div class="reply">
+        <div class="reply__head">Suggested reply · draft</div>
+        <div class="reply__body">${escapeHtml(safe(r.suggested_reply, "(no reply drafted)"))}</div>
+      </div>
     </div>
-    <div class="result__row">
-      <span class="result__label">Confidence</span>
-      <span class="result__value">
-        ${confPct}%
-        <div class="confidence-bar"><div class="confidence-bar__fill" style="width:${confPct}%"></div></div>
-      </span>
-    </div>
-    <div class="result__row">
-      <span class="result__label">Urgency</span>
-      <span class="result__value">
-        <span class="badge badge--urgency-${escapeHtml(urgency)}">${escapeHtml(urgency)}</span>
-      </span>
-    </div>
-    <div class="result__row">
-      <span class="result__label">Intent</span>
-      <span class="result__value">${escapeHtml(safe(r.sender_intent))}</span>
-    </div>
-    <div class="result__row">
-      <span class="result__label">Action</span>
-      <span class="result__value">${escapeHtml(safe(r.recommended_action))}</span>
-    </div>
-    <div class="result__row">
-      <span class="result__label">Flags</span>
-      <span class="result__value">${flagsHtml}</span>
-    </div>
-    <div class="reply-block">${escapeHtml(safe(r.suggested_reply, "(no reply drafted)"))}</div>
   `;
 }
 
@@ -208,9 +248,9 @@ els.copyJsonBtn.addEventListener("click", async () => {
   if (!lastResult) return;
   try {
     await navigator.clipboard.writeText(JSON.stringify(lastResult, null, 2));
-    setStatus("json copied", "ok");
+    setStatus("JSON copied to clipboard", "ok");
   } catch {
-    setStatus("clipboard blocked — open devtools to copy manually", "error");
+    setStatus("Clipboard blocked — open devtools to copy", "error");
   }
 });
 

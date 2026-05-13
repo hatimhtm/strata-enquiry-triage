@@ -3,86 +3,216 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TRIAGE. — AI client-enquiry triage for strata ops</title>
-  <meta name="description" content="A live, client-side demo of the strata enquiry triage CLI. Paste an enquiry, get a categorised draft reply from Claude Sonnet 4.5." />
-  <meta name="theme-color" content="#FFFDF5" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)" />
+  <title>Triage — AI client-enquiry triage for strata operations</title>
+  <meta name="description" content="Paste a client enquiry, get a categorised draft reply from Claude in two seconds. Runs client-side with your own Anthropic API key." />
+  <meta name="theme-color" content="#FAF6F1" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0F0E0D" media="(prefers-color-scheme: dark)" />
 
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231A1A1A'/%3E%3Crect x='4' y='4' width='24' height='24' fill='%23CCFF00'/%3E%3Ctext x='16' y='22' font-family='monospace' font-weight='900' font-size='14' fill='%231A1A1A' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23C95C3C'/%3E%3Cpath d='M9 11h14M9 16h10M9 21h7' stroke='%23FAF6F1' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
 
+  <link rel="preconnect" href="https://api.anthropic.com" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <span class="topbar__chip">PYTHON · ANTHROPIC SDK · CLAUDE SONNET 4.5 · STRUCTURED JSON · STRATA OPS</span>
+  <header class="nav">
+    <div class="container nav__row">
+      <a class="brand" href="/">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="22" height="22">
+            <rect width="32" height="32" rx="8" fill="currentColor"/>
+            <path d="M9 11h14M9 16h10M9 21h7" stroke="#FAF6F1" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="brand__name">Triage</span>
+      </a>
+      <nav class="nav__links">
+        <a href="#how">How it works</a>
+        <a href="#about">About</a>
+        <a href="https://github.com/hatimhtm/strata-enquiry-triage" target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
   </header>
 
   <main>
     <section class="hero">
-      <p class="eyebrow">CLIENT ENQUIRY TRIAGE / CLASSIFY · CONFIDENCE · URGENCY · REPLY / STAFF-IN-THE-LOOP</p>
-      <h1 class="heading">TRIAGE<span class="dot">.</span></h1>
-      <p class="subline">/// READS THE EMAIL · PICKS A CATEGORY · DRAFTS THE REPLY · ROUTES TO STAFF ///</p>
+      <div class="container hero__inner">
+        <span class="pill">
+          <span class="pill__dot" aria-hidden="true"></span>
+          Powered by Claude Sonnet 4.5
+        </span>
+        <h1 class="display">
+          Triage client enquiries<br />
+          <span class="display__accent">in two seconds.</span>
+        </h1>
+        <p class="lede">
+          A live demo of the open-source <a href="https://github.com/hatimhtm/strata-enquiry-triage" target="_blank" rel="noopener">enquiry triage</a> tool. Paste an email from a strata client, and Claude returns a category, a confidence score, a routing recommendation, and a draft reply you can edit and send — never autonomously.
+        </p>
+      </div>
     </section>
 
-    <section class="grid">
-      <article class="card card--input">
-        <header class="card__head">
-          <span class="card__label">/// INPUT</span>
-          <button type="button" class="link" id="loadSampleBtn">load a sample →</button>
-        </header>
+    <section class="app" aria-label="Triage tool">
+      <div class="container">
+        <div class="setup" id="setupWrap">
+          <details class="setup__details" id="config">
+            <summary class="setup__summary">
+              <span class="setup__label">
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="16" r="1"/><rect width="14" height="10" x="5" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                API key
+              </span>
+              <span class="setup__hint" id="setupHint">Click to set your Anthropic key</span>
+            </summary>
+            <div class="setup__body">
+              <p class="setup__copy">
+                Your <code>ANTHROPIC_API_KEY</code> is stored in your browser's <code>localStorage</code> and is sent only from your machine to <code>api.anthropic.com</code>. There is no backend. Nothing is logged on a server.
+                <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get a key →</a>
+              </p>
+              <div class="setup__row">
+                <input type="password" id="apiKey" placeholder="sk-ant-..." spellcheck="false" autocomplete="off" autocapitalize="none" />
+                <button type="button" id="showKeyBtn" class="btn btn--ghost btn--sm" aria-label="Toggle key visibility">Show</button>
+                <button type="button" id="clearKeyBtn" class="btn btn--ghost btn--sm">Clear</button>
+              </div>
+            </div>
+          </details>
+        </div>
 
-        <details class="config" id="config">
-          <summary>API key — stored locally only · click to set</summary>
-          <p class="hint">
-            Your <code>ANTHROPIC_API_KEY</code> is saved to your browser's <code>localStorage</code> and is only ever sent
-            from your browser to <code>api.anthropic.com</code>. Nothing is logged on a server.
-            <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get a key →</a>
-          </p>
-          <div class="key-row">
-            <input type="password" id="apiKey" placeholder="sk-ant-..." spellcheck="false" autocomplete="off" />
-            <button type="button" id="showKeyBtn" class="btn btn--ghost">Show</button>
-            <button type="button" id="clearKeyBtn" class="btn btn--ghost">Clear</button>
+        <div class="grid">
+          <article class="panel">
+            <header class="panel__head">
+              <div>
+                <span class="panel__kicker">01 · Input</span>
+                <h2 class="panel__title">Paste the enquiry</h2>
+              </div>
+              <button type="button" class="link" id="loadSampleBtn">Load a sample →</button>
+            </header>
+
+            <textarea
+              id="enquiry"
+              placeholder="Hi team — I'm on the committee for a 38-lot building in Pyrmont and we're looking to switch strata managers. Could you send through a proposal?"
+              rows="11"
+              spellcheck="false"></textarea>
+
+            <footer class="panel__foot">
+              <button type="button" id="runBtn" class="btn btn--primary">
+                <span class="btn__label">Run triage</span>
+                <svg class="btn__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                <span class="btn__spinner" aria-hidden="true"></span>
+              </button>
+              <button type="button" id="clearBtn" class="btn btn--ghost">Clear</button>
+              <span class="status" id="status" role="status" aria-live="polite"></span>
+            </footer>
+          </article>
+
+          <article class="panel panel--result">
+            <header class="panel__head">
+              <div>
+                <span class="panel__kicker">02 · Result</span>
+                <h2 class="panel__title">Triage output</h2>
+              </div>
+              <button type="button" class="link" id="copyJsonBtn" disabled>Copy JSON</button>
+            </header>
+
+            <div class="output" id="output" aria-live="polite">
+              <div class="empty">
+                <svg viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty__icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+                <p class="empty__title">No result yet</p>
+                <p class="empty__copy">Paste an enquiry and click <strong>Run triage</strong>.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" id="how">
+      <div class="container">
+        <span class="section-kicker">Design</span>
+        <h2 class="section-title">Five rules baked into the prompt</h2>
+        <p class="section-lede">
+          Most "classify this" prompts run at about 60% accuracy in production because they're missing the rules below. The system prompt enforces all five.
+        </p>
+
+        <ol class="rules">
+          <li class="rule">
+            <span class="rule__num">01</span>
+            <div>
+              <h3 class="rule__title">Closed category enum</h3>
+              <p>One of six labels — <code>new_client</code>, <code>support_request</code>, <code>complaint</code>, <code>billing_question</code>, <code>general_question</code>, <code>spam_or_unclear</code>. No free-text drift to break downstream routing.</p>
+            </div>
+          </li>
+          <li class="rule">
+            <span class="rule__num">02</span>
+            <div>
+              <h3 class="rule__title">Self-rated confidence</h3>
+              <p>The model is told to <em>lower</em> its confidence on ambiguous inputs — a 0.6 is a real signal to escalate, not a model that's confidently wrong.</p>
+            </div>
+          </li>
+          <li class="rule">
+            <span class="rule__num">03</span>
+            <div>
+              <h3 class="rule__title">No invented facts</h3>
+              <p>Forbids fabricating lot numbers, dates, dollar figures, staff names. If info is missing, the model is told to <em>ask in the reply</em> instead of inventing.</p>
+            </div>
+          </li>
+          <li class="rule">
+            <span class="rule__num">04</span>
+            <div>
+              <h3 class="rule__title">Urgency + flags</h3>
+              <p>Three-level urgency for queue sorting; flags for <code>contains_pii</code>, <code>needs_human_review</code>, <code>out_of_scope</code> so downstream automation can mask, encrypt, or escalate.</p>
+            </div>
+          </li>
+          <li class="rule">
+            <span class="rule__num">05</span>
+            <div>
+              <h3 class="rule__title">Draft, not send</h3>
+              <p>Every output is a draft a human reads before it goes out. There is no autonomous reply mode — by design, not by accident.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="container">
+        <div class="about__grid">
+          <div>
+            <span class="section-kicker">About</span>
+            <h2 class="section-title">Built for the AI Developer assessment.</h2>
+            <p class="section-lede">
+              This is the Part 1 deliverable for the Strata Management Consultants AI Developer take-home. The same logic runs in three places: a Python CLI, a 19-test pytest suite, and the web app you're using right now. A drift-guard test in CI ensures the Python and JavaScript prompts can't silently diverge.
+            </p>
+            <div class="cta-row">
+              <a class="btn btn--primary" href="https://github.com/hatimhtm/strata-enquiry-triage" target="_blank" rel="noopener">View on GitHub</a>
+              <a class="btn btn--ghost" href="https://github.com/hatimhtm/strata-enquiry-triage/blob/main/README.md" target="_blank" rel="noopener">Read the design notes</a>
+            </div>
           </div>
-        </details>
-
-        <textarea id="enquiry" placeholder="Paste a client enquiry here. The triage will run client-side against the Anthropic API." rows="14" spellcheck="false"></textarea>
-
-        <div class="actions">
-          <button type="button" id="runBtn" class="btn btn--primary">RUN TRIAGE →</button>
-          <button type="button" id="clearBtn" class="btn btn--ghost">Clear</button>
-          <span class="status" id="status" role="status" aria-live="polite"></span>
+          <ul class="stats">
+            <li>
+              <span class="stats__num">33</span>
+              <span class="stats__label">Tests passing in CI<br/>(19 pytest · 14 node)</span>
+            </li>
+            <li>
+              <span class="stats__num">~2s</span>
+              <span class="stats__label">Median time from paste to draft reply</span>
+            </li>
+            <li>
+              <span class="stats__num">0</span>
+              <span class="stats__label">Server hops — your key never leaves your browser</span>
+            </li>
+          </ul>
         </div>
-      </article>
-
-      <article class="card card--output">
-        <header class="card__head">
-          <span class="card__label">/// OUTPUT</span>
-          <button type="button" class="link" id="copyJsonBtn" disabled>copy JSON →</button>
-        </header>
-
-        <div class="output" id="output" aria-live="polite">
-          <p class="placeholder">No result yet. Paste an enquiry and click <strong>RUN TRIAGE</strong>.</p>
-        </div>
-      </article>
-    </section>
-
-    <section class="how">
-      <h2 class="how__title">/// HOW IT WORKS</h2>
-      <ol class="how__list">
-        <li><strong>Closed category enum.</strong> The system prompt forces one of six labels — no free-text drift breaking downstream routing.</li>
-        <li><strong>Self-rated confidence.</strong> The model is told to <em>lower</em> its confidence on ambiguous inputs, so a 0.6 score is a real signal to escalate.</li>
-        <li><strong>No-invented-facts rule.</strong> The prompt forbids fabricating lot numbers, dates, or staff names — staff can edit the draft without quietly correcting hallucinations.</li>
-        <li><strong>Three flags.</strong> <code>contains_pii</code>, <code>ambiguous_input</code>, <code>needs_human_review</code>, <code>out_of_scope</code> — downstream automation can mask, encrypt, or escalate.</li>
-        <li><strong>Draft-not-send.</strong> Every output is a draft a human reads before it goes out. There is no autonomous reply mode.</li>
-      </ol>
+      </div>
     </section>
   </main>
 
   <footer class="foot">
-    <p>
-      <a href="https://github.com/hatimhtm/strata-enquiry-triage">github.com/hatimhtm/strata-enquiry-triage</a>
-      &nbsp;·&nbsp; MIT &nbsp;·&nbsp; built by <a href="https://hatimelhassak.is-a.dev">Hatim El Hassak</a>
-    </p>
+    <div class="container foot__row">
+      <span>© 2026 Hatim El Hassak · MIT</span>
+      <nav class="foot__links">
+        <a href="https://hatimelhassak.is-a.dev" target="_blank" rel="noopener">Portfolio</a>
+        <a href="https://www.linkedin.com/in/hatim-elhassak/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com/hatimhtm/strata-enquiry-triage" target="_blank" rel="noopener">Source</a>
+      </nav>
+    </div>
   </footer>
 
   <script type="module" src="app.js"></script>
