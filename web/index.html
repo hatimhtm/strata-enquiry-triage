@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRIAGE. — AI client-enquiry triage for strata ops</title>
+  <meta name="description" content="A live, client-side demo of the strata enquiry triage CLI. Paste an enquiry, get a categorised draft reply from Claude Sonnet 4.5." />
+  <meta name="theme-color" content="#FFFDF5" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)" />
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231A1A1A'/%3E%3Crect x='4' y='4' width='24' height='24' fill='%23CCFF00'/%3E%3Ctext x='16' y='22' font-family='monospace' font-weight='900' font-size='14' fill='%231A1A1A' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <span class="topbar__chip">PYTHON · ANTHROPIC SDK · CLAUDE SONNET 4.5 · STRUCTURED JSON · STRATA OPS</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">CLIENT ENQUIRY TRIAGE / CLASSIFY · CONFIDENCE · URGENCY · REPLY / STAFF-IN-THE-LOOP</p>
+      <h1 class="heading">TRIAGE<span class="dot">.</span></h1>
+      <p class="subline">/// READS THE EMAIL · PICKS A CATEGORY · DRAFTS THE REPLY · ROUTES TO STAFF ///</p>
+    </section>
+
+    <section class="grid">
+      <article class="card card--input">
+        <header class="card__head">
+          <span class="card__label">/// INPUT</span>
+          <button type="button" class="link" id="loadSampleBtn">load a sample →</button>
+        </header>
+
+        <details class="config" id="config">
+          <summary>API key — stored locally only · click to set</summary>
+          <p class="hint">
+            Your <code>ANTHROPIC_API_KEY</code> is saved to your browser's <code>localStorage</code> and is only ever sent
+            from your browser to <code>api.anthropic.com</code>. Nothing is logged on a server.
+            <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get a key →</a>
+          </p>
+          <div class="key-row">
+            <input type="password" id="apiKey" placeholder="sk-ant-..." spellcheck="false" autocomplete="off" />
+            <button type="button" id="showKeyBtn" class="btn btn--ghost">Show</button>
+            <button type="button" id="clearKeyBtn" class="btn btn--ghost">Clear</button>
+          </div>
+        </details>
+
+        <textarea id="enquiry" placeholder="Paste a client enquiry here. The triage will run client-side against the Anthropic API." rows="14" spellcheck="false"></textarea>
+
+        <div class="actions">
+          <button type="button" id="runBtn" class="btn btn--primary">RUN TRIAGE →</button>
+          <button type="button" id="clearBtn" class="btn btn--ghost">Clear</button>
+          <span class="status" id="status" role="status" aria-live="polite"></span>
+        </div>
+      </article>
+
+      <article class="card card--output">
+        <header class="card__head">
+          <span class="card__label">/// OUTPUT</span>
+          <button type="button" class="link" id="copyJsonBtn" disabled>copy JSON →</button>
+        </header>
+
+        <div class="output" id="output" aria-live="polite">
+          <p class="placeholder">No result yet. Paste an enquiry and click <strong>RUN TRIAGE</strong>.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="how">
+      <h2 class="how__title">/// HOW IT WORKS</h2>
+      <ol class="how__list">
+        <li><strong>Closed category enum.</strong> The system prompt forces one of six labels — no free-text drift breaking downstream routing.</li>
+        <li><strong>Self-rated confidence.</strong> The model is told to <em>lower</em> its confidence on ambiguous inputs, so a 0.6 score is a real signal to escalate.</li>
+        <li><strong>No-invented-facts rule.</strong> The prompt forbids fabricating lot numbers, dates, or staff names — staff can edit the draft without quietly correcting hallucinations.</li>
+        <li><strong>Three flags.</strong> <code>contains_pii</code>, <code>ambiguous_input</code>, <code>needs_human_review</code>, <code>out_of_scope</code> — downstream automation can mask, encrypt, or escalate.</li>
+        <li><strong>Draft-not-send.</strong> Every output is a draft a human reads before it goes out. There is no autonomous reply mode.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>
+      <a href="https://github.com/hatimhtm/strata-enquiry-triage">github.com/hatimhtm/strata-enquiry-triage</a>
+      &nbsp;·&nbsp; MIT &nbsp;·&nbsp; built by <a href="https://hatimelhassak.is-a.dev">Hatim El Hassak</a>
+    </p>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

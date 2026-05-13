@@ -1,0 +1,356 @@
+:root {
+  --ink: #1A1A1A;
+  --cream: #FFFDF5;
+  --acid: #CCFF00;
+  --rust: #CC785C;
+  --grid: rgba(26, 26, 26, 0.08);
+
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace;
+  --display: 'Helvetica Neue', 'Arial Black', Helvetica, Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #FFFDF5;
+    --cream: #0F172A;
+    --acid: #CCFF00;
+    --rust: #F4A261;
+    --grid: rgba(255, 253, 245, 0.06);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.55;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  min-height: 100vh;
+}
+
+a { color: inherit; }
+a:hover { background: var(--acid); color: var(--ink); }
+
+/* ─── Top tech bar ──────────────────────────────────────────── */
+.topbar {
+  background: var(--ink);
+  color: var(--acid);
+  border-bottom: 3px solid var(--acid);
+  padding: 10px 24px;
+  text-align: center;
+}
+.topbar__chip {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+}
+
+/* ─── Hero ──────────────────────────────────────────────────── */
+main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+.hero { margin-bottom: 40px; }
+
+.eyebrow {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin: 0 0 16px;
+  opacity: 0.85;
+}
+
+.heading {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: clamp(72px, 14vw, 170px);
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+  margin: 0;
+}
+.heading .dot {
+  background: linear-gradient(135deg, var(--rust), var(--acid));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subline {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 4px;
+  margin: 16px 0 0;
+}
+
+/* ─── Grid ──────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 56px;
+}
+@media (max-width: 800px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* ─── Card ──────────────────────────────────────────────────── */
+.card {
+  background: var(--cream);
+  border: 3px solid var(--ink);
+  padding: 20px;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+.card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 8px;
+}
+.card__label {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.link {
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.link:not([disabled]):hover { background: var(--acid); }
+.link[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Config ────────────────────────────────────────────────── */
+.config {
+  border: 2px dashed var(--ink);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+.config summary {
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.config .hint {
+  font-size: 12px;
+  line-height: 1.55;
+  margin: 12px 0;
+  opacity: 0.8;
+}
+.config code {
+  background: var(--ink);
+  color: var(--acid);
+  padding: 1px 5px;
+  font-size: 11px;
+}
+.key-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.key-row input {
+  flex: 1;
+  min-width: 220px;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.key-row input:focus { outline: 3px solid var(--acid); outline-offset: 0; }
+
+/* ─── Textarea ──────────────────────────────────────────────── */
+textarea {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 220px;
+}
+textarea:focus { outline: 3px solid var(--acid); outline-offset: 0; }
+
+/* ─── Actions ───────────────────────────────────────────────── */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.btn {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 18px;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 0.06s ease;
+}
+.btn:not([disabled]):hover {
+  background: var(--acid);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.btn:not([disabled]):active { transform: translate(0, 0); box-shadow: none; }
+.btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.btn--primary { background: var(--acid); }
+.btn--ghost { background: transparent; }
+
+.status {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.8;
+}
+.status.error { color: var(--rust); opacity: 1; }
+.status.ok { opacity: 1; }
+
+/* ─── Output ────────────────────────────────────────────────── */
+.output { min-height: 200px; }
+.output .placeholder {
+  font-size: 12px;
+  opacity: 0.6;
+  margin: 0;
+}
+
+.result__row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--ink);
+  font-size: 13px;
+  gap: 8px;
+}
+.result__row:last-of-type { border-bottom: 0; }
+.result__label {
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 11px;
+  opacity: 0.7;
+  padding-top: 1px;
+}
+.result__value { word-wrap: break-word; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: 2px solid var(--ink);
+}
+.badge--urgency-high { background: var(--rust); color: var(--cream); }
+.badge--urgency-normal { background: var(--cream); }
+.badge--urgency-low { background: var(--cream); opacity: 0.6; }
+.badge--category { background: var(--acid); color: var(--ink); }
+.badge--flag { background: var(--ink); color: var(--acid); margin-right: 6px; }
+
+.confidence-bar {
+  height: 6px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  width: 100%;
+  position: relative;
+  margin-top: 6px;
+}
+.confidence-bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--acid);
+}
+
+.reply-block {
+  margin-top: 16px;
+  padding: 14px;
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+.reply-block::before {
+  content: '── Suggested reply ──';
+  display: block;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 10px;
+}
+
+/* ─── How it works ──────────────────────────────────────────── */
+.how {
+  border: 3px solid var(--ink);
+  padding: 24px 28px;
+  background: var(--cream);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.how__title {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin: 0 0 16px;
+}
+.how__list {
+  padding-left: 22px;
+  margin: 0;
+  font-size: 13px;
+}
+.how__list li { margin-bottom: 10px; }
+.how__list code {
+  background: var(--ink);
+  color: var(--acid);
+  padding: 1px 5px;
+  font-size: 11px;
+}
+
+/* ─── Footer ────────────────────────────────────────────────── */
+.foot {
+  border-top: 3px solid var(--ink);
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin-top: 40px;
+}

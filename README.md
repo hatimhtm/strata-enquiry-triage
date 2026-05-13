@@ -6,10 +6,11 @@
 </p>
 
 <p align="center">
+  <a href="https://hatimhtm.github.io/strata-enquiry-triage/"><img src="https://img.shields.io/badge/▶_LIVE_DEMO-CCFF00?style=for-the-badge&labelColor=1A1A1A" alt="Live demo" /></a>
   <a href="https://github.com/hatimhtm/strata-enquiry-triage/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/hatimhtm/strata-enquiry-triage/ci.yml?branch=main&style=for-the-badge&label=CI&labelColor=1A1A1A&color=CCFF00" alt="CI" /></a>
   <img src="https://img.shields.io/badge/Python-3.10+-1A1A1A?style=for-the-badge&logo=python&logoColor=CCFF00" alt="Python 3.10+" />
   <img src="https://img.shields.io/badge/Claude-Sonnet_4.5-1A1A1A?style=for-the-badge&logo=anthropic&logoColor=CCFF00" alt="Claude Sonnet 4.5" />
-  <img src="https://img.shields.io/badge/Anthropic_SDK-1A1A1A?style=for-the-badge&logo=anthropic&logoColor=CCFF00" alt="Anthropic SDK" />
+  <img src="https://img.shields.io/badge/Tests-19_passing-1A1A1A?style=for-the-badge&labelColor=1A1A1A&color=CCFF00" alt="19 tests passing" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/LICENSE-MIT-1A1A1A?style=for-the-badge&labelColor=1A1A1A&color=CCFF00" alt="MIT" /></a>
 </p>
 
@@ -83,17 +84,37 @@ It's a CLI deliberately. The brief asked for a small working tool, and a single-
 ```
 strata-enquiry-triage/
 ├── triage.py                  single-file CLI — pipeline, prompt, formatter
+├── pyproject.toml             ruff + pytest config
 ├── requirements.txt           anthropic + python-dotenv, that's it
 ├── .env.example               ANTHROPIC_API_KEY scaffold
+├── tests/                     pytest — 19 tests, Anthropic client mocked
+│   ├── conftest.py            fake-client fixture + canonical payload
+│   └── test_triage.py         prompt parity · short-circuits · parser ·
+│                              error paths · render · file/stdin input
+├── web/                       live demo (deployed to GitHub Pages)
+│   ├── index.html             brutalist single-page UI
+│   ├── style.css              cream / ink / acid-lime tokens, dark mode
+│   ├── app.js                 DOM glue — ES module
+│   ├── triage-core.js         pure logic — system prompt, parser, fetch
+│   └── triage-core.test.mjs   node --test — 14 tests including Python↔JS
+│                              prompt-parity drift guard
 ├── examples/
 │   ├── new_client.txt         realistic AU committee quote request
 │   ├── complaint.txt          urgent ceiling-leak complaint with NCAT threat
 │   └── gibberish.txt          edge case — should return spam_or_unclear
 ├── .github/
-│   ├── workflows/ci.yml       ruff + py-compile + import sanity check
+│   ├── workflows/ci.yml       ruff · pytest · node --test · Pages deploy
 │   └── FUNDING.yml
 └── assets-readme/             brutalist banner SVGs (light + dark)
 ```
+
+---
+
+### `/// LIVE DEMO`
+
+The web app at **[hatimhtm.github.io/strata-enquiry-triage](https://hatimhtm.github.io/strata-enquiry-triage/)** is the same logic as the CLI, running entirely in your browser. You paste your own Anthropic API key (stored in `localStorage`, sent only to `api.anthropic.com` via the official `anthropic-dangerous-direct-browser-access` header — no backend, no server logs) and try the triage against your own enquiries or the four bundled samples.
+
+The web layer shares its system prompt and category enum with `triage.py` through a Node-importable `triage-core.js` module, and the CI has a drift-guard test that fails the build if the two ever fall out of lock-step.
 
 ---
 
@@ -120,6 +141,28 @@ cat examples/new_client.txt | python triage.py
 python triage.py --file examples/new_client.txt --json
 ```
 
+**Run the web demo locally:**
+
+```bash
+cd web && python3 -m http.server 8000
+open http://localhost:8000
+```
+
+**Run the test suites:**
+
+```bash
+# Python — 19 tests, Anthropic client mocked, no network calls
+pip install pytest ruff
+pytest -ra
+
+# Web — 14 tests, node --test (no framework, no install step)
+node --test web/triage-core.test.mjs
+
+# Lint (matches CI)
+ruff check triage.py tests/
+ruff format --check triage.py tests/
+```
+
 Sample output for `examples/complaint.txt`:
 
 ```
@@ -137,6 +180,18 @@ Sample output for `examples/complaint.txt`:
   in our response. We are treating this as urgent...
 ────────────────────────────────────────────────────────────────
 ```
+
+---
+
+### `/// TEST COVERAGE`
+
+| Layer | Tool | What it covers |
+|---|---|---|
+| **Python core** | `pytest` (19 tests) | Closed-enum shape, prompt-rule presence, `TriageResult.from_dict` defaults + type coercion, empty/whitespace short-circuit (no API call), happy-path JSON parsing, system-prompt routing, markdown-fence tolerance (both `\`\`\`json` and bare `\`\`\``), invalid-JSON error path, render formatting, file + inline input. |
+| **Web core** | `node --test` (14 tests) | Same closed-enum + prompt-rule guards, fence stripping in JS, normalisation defaults, fake-`fetch` happy path with header + body assertions, 401 error path, non-JSON error path, **Python↔JS prompt parity drift guard** (reads `triage.py` from the JS test and asserts the load-bearing rules match). |
+| **CI** | GitHub Actions | Two parallel jobs (Python + Web), then a third deploy job that uploads `web/` to GitHub Pages on push-to-main. |
+
+The drift-guard test is the most interesting one — if the Python `SYSTEM_PROMPT` is updated without the JS one, or vice versa, the CI build fails. This is the kind of cross-language sync bug that's easy to ship and impossible to debug after the fact.
 
 ---
 

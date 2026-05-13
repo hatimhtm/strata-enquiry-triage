@@ -21,7 +21,7 @@ import textwrap
 from dataclasses import dataclass
 
 try:
-    from anthropic import Anthropic, APIError, APIConnectionError, RateLimitError
+    from anthropic import Anthropic, APIConnectionError, APIError, RateLimitError
 except ImportError:
     sys.stderr.write("Missing dependency. Run: pip install -r requirements.txt\n")
     sys.exit(2)
@@ -71,7 +71,7 @@ class TriageResult:
     flags: list[str]
 
     @classmethod
-    def from_dict(cls, data: dict) -> "TriageResult":
+    def from_dict(cls, data: dict) -> TriageResult:
         return cls(
             category=str(data.get("category", "spam_or_unclear")),
             confidence=float(data.get("confidence", 0.0)),
@@ -142,7 +142,7 @@ def read_input(args: argparse.Namespace) -> str:
     if args.text:
         return args.text
     if args.file:
-        with open(args.file, "r", encoding="utf-8") as f:
+        with open(args.file, encoding="utf-8") as f:
             return f.read()
     if not sys.stdin.isatty():
         return sys.stdin.read()
@@ -161,9 +161,7 @@ def main() -> int:
 
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
-        sys.stderr.write(
-            "Set ANTHROPIC_API_KEY in your environment (.env supported).\n"
-        )
+        sys.stderr.write("Set ANTHROPIC_API_KEY in your environment (.env supported).\n")
         return 2
 
     enquiry = read_input(args)
