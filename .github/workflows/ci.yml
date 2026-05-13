@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Python checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff
+
+      - name: Lint (ruff)
+        run: ruff check triage.py
+
+      - name: Format check (ruff)
+        run: ruff format --check triage.py
+
+      - name: Compile
+        run: python -m py_compile triage.py
+
+      - name: Import sanity
+        env:
+          ANTHROPIC_API_KEY: dummy-key-for-import-check
+        run: |
+          python -c "
+          import triage
+          assert hasattr(triage, 'triage'), 'triage() missing'
+          assert hasattr(triage, 'TriageResult'), 'TriageResult dataclass missing'
+          assert 'spam_or_unclear' in triage.CATEGORIES, 'spam_or_unclear category missing'
+          assert len(triage.CATEGORIES) == 6, f'expected 6 categories, got {len(triage.CATEGORIES)}'
+          print('Import sanity passed.')
+          "
+
+      - name: Confirm example fixtures present
+        run: |
+          test -f examples/new_client.txt
+          test -f examples/complaint.txt
+          test -f examples/gibberish.txt
+          echo "All example fixtures present."

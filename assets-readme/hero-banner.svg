@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-label="Strata Enquiry Triage — AI-powered enquiry classifier and reply drafter">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1A1A1A" stroke-width="0.5" stroke-opacity="0.08"/>
+    </pattern>
+    <linearGradient id="r" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#CC785C"/>
+      <stop offset="1" stop-color="#F4A261"/>
+    </linearGradient>
+    <style>
+      .heading { font-family: 'Helvetica Neue', 'Arial Black', Helvetica, Arial, sans-serif; font-weight: 900; }
+      .mono    { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="400" fill="#FFFDF5"/>
+  <rect width="1280" height="400" fill="url(#grid)"/>
+
+  <rect x="0" y="0" width="1280" height="36" fill="#1A1A1A"/>
+  <line x1="0" y1="36" x2="1280" y2="36" stroke="#CCFF00" stroke-width="3"/>
+  <text class="mono" x="640" y="24" text-anchor="middle" font-size="12" fill="#CCFF00" letter-spacing="6">PYTHON · ANTHROPIC SDK · CLAUDE SONNET 4.5 · STRUCTURED JSON · CLI-FIRST · STRATA OPS</text>
+
+  <text class="mono" x="60" y="100" font-size="13" fill="#1A1A1A" letter-spacing="6">CLIENT ENQUIRY TRIAGE / CLASSIFY · CONFIDENCE · URGENCY · REPLY / STAFF-IN-THE-LOOP</text>
+
+  <text class="heading" x="60" y="250" font-size="170" fill="#1A1A1A" letter-spacing="-6">TRIAGE<tspan fill="url(#r)">.</tspan></text>
+
+  <text class="mono" x="60" y="310" font-size="14" fill="#1A1A1A" letter-spacing="4">/// READS THE EMAIL · PICKS A CATEGORY · DRAFTS THE REPLY · ROUTES TO STAFF ///</text>
+
+  <rect x="1080" y="80" width="140" height="140" fill="#1A1A1A" stroke="#CCFF00" stroke-width="6"/>
+  <text class="mono" x="1150" y="138" text-anchor="middle" font-size="13" fill="#CCFF00" letter-spacing="2">READS</text>
+  <text class="mono" x="1150" y="158" text-anchor="middle" font-size="13" fill="#CCFF00" letter-spacing="2">DRAFTS</text>
+  <text class="mono" x="1150" y="178" text-anchor="middle" font-size="13" fill="#CCFF00" letter-spacing="2">ROUTES</text>
+
+  <text class="mono" x="60" y="378" font-size="12" fill="#1A1A1A" letter-spacing="4">/// CLOSED CATEGORY ENUM · SELF-RATED CONFIDENCE · HUMAN REVIEWS THE DRAFT · MIT ///</text>
+</svg>
